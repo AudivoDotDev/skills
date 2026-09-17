@@ -40,7 +40,8 @@ for the audio-you-hold-rights-to path.
 1. **Find the show.** `GET /v1/search/shows?q=...` returns shows ranked so the
    show a name means comes first. Keep `show_id`, `feed_url` and `itunes_id`
    from the entry the user picks. Or `GET /v1/charts?category=...` for a
-   category chart. Neither spends credits.
+   category chart. Neither spends credits. An empty `data` means the show
+   has no public feed; see "When search finds nothing" below.
 2. **Pick episodes (optional).** `GET /v1/shows/{show_id}/episodes?feed_url=...&itunes_id=...`
    lists episodes newest first with an `episode_id` each. Skip this step to
    take the newest episode per show.
@@ -66,6 +67,23 @@ for the audio-you-hold-rights-to path.
 
 For one episode you already have a pointer for, `POST /v1/transcripts` does
 steps 4 to 6 in one call; see `references/poll-and-read.md`.
+
+## When search finds nothing
+
+Some shows publish only on Spotify or YouTube and have no public RSS feed,
+so `search/shows` returns an empty `data` (or only unrelated shows) and no
+Apple Podcasts link exists. Audivo's servers do not fetch those platforms.
+Do not stop there:
+
+1. Tell the user the show is not in any podcast feed Audivo can read.
+2. If you can run commands on the user's machine and the user holds the
+   rights to transcribe the audio, obtain the audio file yourself, for
+   example `yt-dlp -x --audio-format m4a <video url>` for a YouTube video,
+   then continue at step 3 of the flow with `scripts/upload.sh <file> [title]`.
+3. Otherwise ask the user for an audio file and upload it the same way.
+
+An upload is priced by its duration, read from the file when the container
+carries one, and its transcript is private to the account that uploaded it.
 
 ## Rules that keep money safe
 
