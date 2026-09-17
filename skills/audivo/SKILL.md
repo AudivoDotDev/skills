@@ -23,8 +23,10 @@ and come back at once.
 - The user asks what a transcript will cost, or how many credits they have.
 - The user pasted an Apple Podcasts episode link or an RSS feed URL.
 
-Not for: direct audio files, uploads, YouTube, Spotify-only shows. Audivo
-refuses those with `source_not_supported` and reserves nothing.
+Not for: direct audio URLs; Spotify-only or YouTube-only shows unless you
+obtain the audio yourself and upload it. Audivo refuses a raw pointer with
+`source_not_supported` and reserves nothing; see `references/uploads.md`
+for the audio-you-hold-rights-to path.
 
 ## Setup
 
@@ -42,24 +44,28 @@ refuses those with `source_not_supported` and reserves nothing.
 2. **Pick episodes (optional).** `GET /v1/shows/{show_id}/episodes?feed_url=...&itunes_id=...`
    lists episodes newest first with an `episode_id` each. Skip this step to
    take the newest episode per show.
-3. **Price it.** `POST /v1/quotes` with `shows` (feed URLs, optional
-   `episode_ids`) or `chart`. The answer has `total_ceiling_credits`, the
-   most the selection can cost, plus `balance_credits` and every excluded
-   episode with a reason. A quote reserves nothing and expires after 15
-   minutes.
-4. **Confirm it.** `POST /v1/quotes/{quote_id}/confirm` with a fresh
+3. **Or upload a file.** No feed reaches your own recording, or audio you
+   obtained yourself with rights to transcribe. `scripts/upload.sh <file>
+   [title]` announces it, PUTs it, and prints an `upload_id` plus a ready
+   quote body. See `references/uploads.md`.
+4. **Price it.** `POST /v1/quotes` with `shows` (feed URLs, optional
+   `episode_ids`), `chart`, or `uploads` (`upload_id`s from step 3). The
+   answer has `total_ceiling_credits`, the most the selection can cost,
+   plus `balance_credits` and every excluded episode with a reason. A
+   quote reserves nothing and expires after 15 minutes.
+5. **Confirm it.** `POST /v1/quotes/{quote_id}/confirm` with a fresh
    `Idempotency-Key` header and a body of
    `{ "expected_total_credits": <total_ceiling_credits> }`. This is the
    step that spends. See Spending rules below before you call it.
-5. **Poll the group.** `GET /v1/groups/{group_id}` until `member_counts`
+6. **Poll the group.** `GET /v1/groups/{group_id}` until `member_counts`
    shows nothing in `validating`, `queued`, `downloading`, `transcribing`
    or `merging`. Wait about ten seconds between polls.
-6. **Read.** `GET /v1/transcripts/{job_id}?format=json` for a completed job,
+7. **Read.** `GET /v1/transcripts/{job_id}?format=json` for a completed job,
    `GET /v1/reads/{read_id}?format=json` for a `cached_read` member.
    Re-reading something already paid for costs nothing.
 
 For one episode you already have a pointer for, `POST /v1/transcripts` does
-steps 3 to 5 in one call; see `references/poll-and-read.md`.
+steps 4 to 6 in one call; see `references/poll-and-read.md`.
 
 ## Rules that keep money safe
 
@@ -99,6 +105,7 @@ steps 3 to 5 in one call; see `references/poll-and-read.md`.
 | --------------------------------------------- | --------------------------------- |
 | Search, charts, episode listing               | `references/discover.md`          |
 | Quote request shape, confirm, idempotency     | `references/quote-and-confirm.md` |
+| Uploading your own audio                      | `references/uploads.md`           |
 | Group and job states, formats, cache, one-shot | `references/poll-and-read.md`     |
 | Every error code and what to do               | `references/errors.md`            |
 
@@ -106,6 +113,7 @@ steps 3 to 5 in one call; see `references/poll-and-read.md`.
 | ----------------------------- | ------------------------------------------------ |
 | `scripts/search.sh "<name>"`  | search shows by name                             |
 | `scripts/episodes.sh`         | list a show's episodes                           |
+| `scripts/upload.sh`           | announce and upload your own audio file           |
 | `scripts/quote.sh`            | price episodes of one show                       |
 | `scripts/confirm.sh`          | confirm a quote (spends credits)                 |
 | `scripts/poll.sh`             | read a group, or a job's status                  |

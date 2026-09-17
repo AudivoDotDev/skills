@@ -3,7 +3,9 @@
 An [Agent Skill](https://agentskills.io) that teaches your coding agent the
 [Audivo API](https://docs.audivo.dev): find a podcast show, list its episodes,
 price a transcript, confirm the spend, poll the job, and read the transcript
-as JSON, plain text, SRT, VTT or Markdown.
+as JSON, plain text, SRT, VTT or Markdown. Audio you hold the rights to but
+that has no feed, such as your own recording, can be uploaded directly and
+priced the same way.
 
 Once installed, the skill activates on its own when you mention podcast
 transcripts, a show or episode, podcast charts, or the Audivo API.
@@ -49,11 +51,13 @@ skills/audivo/
 ├── references/
 │   ├── discover.md           # search shows, charts, list episodes
 │   ├── quote-and-confirm.md  # price a selection, then spend it once
+│   ├── uploads.md            # announce, upload and quote your own audio
 │   ├── poll-and-read.md      # group and job states, transcript formats
 │   └── errors.md             # every error code and what to do about it
 └── scripts/
     ├── search.sh             # find shows by name
     ├── episodes.sh           # list a show's episodes
+    ├── upload.sh             # announce and upload your own audio file
     ├── quote.sh              # price one or more episodes
     ├── confirm.sh            # confirm a quote (spends credits)
     ├── poll.sh               # read a group or a job

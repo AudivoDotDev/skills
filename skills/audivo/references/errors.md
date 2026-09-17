@@ -37,6 +37,7 @@ Status and type are the spec's. "Do" is what an agent should do next.
 | `payment_required`    | 402    | payment_required  | no    | Balance cannot cover the ceiling. Shrink the selection or ask the user to add credits, then quote again. |
 | `rate_limited`        | 429    | rate_limited      | yes   | Over requests per minute. Sleep for `Retry-After` seconds, then repeat the same request. |
 | `concurrency_limited` | 429    | rate_limited      | yes   | The plan's open-job cap is reached. Wait for a job to finish, or confirm fewer episodes. |
+| `upload_quota_exceeded` | 429  | rate_limited      | yes   | The account already holds its 10 GiB / 100-announcement upload allowance. No `PUT` URL was issued. The message names the earliest time enough capacity returns; there is no way to release an announcement early. See `references/uploads.md`. |
 
 ### Quotes, confirms and groups
 
@@ -76,6 +77,19 @@ Status and type are the spec's. "Do" is what an agent should do next.
 | `size_exceeded`        | 422    | unprocessable_input | no    | Over the 5 GB cap.                                                                  |
 | `content_blocked`      | 451    | content_blocked     | no    | A publisher or legal block is active. Tell the user.                                |
 | `discovery_unavailable`| 503    | unavailable         | yes   | The show directory did not answer. Retry later.                                     |
+
+### Quoting an upload
+
+These three are not envelope errors, so nothing above applies to them.
+Quoting an upload still answers `200`; a failing upload comes back inside
+the quote's `excluded[]` with one of these reasons instead. Full detail in
+`references/uploads.md`.
+
+| reason                 | do                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `upload_not_found`      | The `upload_id` is unknown, belongs to another account, or is past `retained_until`. Announce again. |
+| `upload_not_received`   | Nothing has landed at the bucket key yet. Send the PUT, then quote again.                        |
+| `upload_mismatch`       | What landed does not match the announced length or hash. Announce again with the correct file.   |
 
 ### Your account
 
