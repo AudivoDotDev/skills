@@ -64,7 +64,7 @@ skills/audivo/
 
 - **MCP server.** Run `npx -y @audivo/mcp` locally, or point an MCP client at
   the hosted server at `https://api.audivo.dev/mcp` with your key in the
-  `Authorization` header. See [docs.audivo.dev/mcp](https://docs.audivo.dev/mcp).
+  `Authorization` header. See [docs.audivo.dev/mcp-server](https://docs.audivo.dev/mcp-server).
 - **REST API.** The full reference, with every field, is at
   [docs.audivo.dev](https://docs.audivo.dev).
 
