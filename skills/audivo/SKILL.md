@@ -113,7 +113,7 @@ steps 4 to 6 in one call; see `references/poll-and-read.md`.
 | ----------------------------- | ------------------------------------------------ |
 | `scripts/search.sh "<name>"`  | search shows by name                             |
 | `scripts/episodes.sh`         | list a show's episodes                           |
-| `scripts/upload.sh`           | announce and upload your own audio file           |
+| `scripts/upload.sh`           | announce and upload your own audio file          |
 | `scripts/quote.sh`            | price episodes of one show                       |
 | `scripts/confirm.sh`          | confirm a quote (spends credits)                 |
 | `scripts/poll.sh`             | read a group, or a job's status                  |

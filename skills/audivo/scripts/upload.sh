@@ -76,37 +76,66 @@ else
   exit 1
 fi
 
-TITLE_JSON=""
+# json.dumps over the args, so a title with a quote or a backslash cannot
+# break the body.
+PY_ARGS=("$SHA256" "$BYTES" "$CONTENT_TYPE" "$DURATION")
 if [ "$TITLE" != "" ]; then
-  TITLE_JSON=", \"title\": \"$TITLE\""
+  PY_ARGS+=("$TITLE")
 fi
 
-BODY=$(cat <<JSON
-{
-  "sha256": "$SHA256",
-  "bytes": $BYTES,
-  "content_type": "$CONTENT_TYPE",
-  "declared_duration_seconds": $DURATION$TITLE_JSON
+BODY=$(python3 -c '
+import json, sys
+
+sha256, bytes_str, content_type, duration_str = sys.argv[1:5]
+title = sys.argv[5] if len(sys.argv) > 5 else None
+
+try:
+    duration = int(duration_str)
+except ValueError:
+    duration = float(duration_str)
+
+body = {
+    "sha256": sha256,
+    "bytes": int(bytes_str),
+    "content_type": content_type,
+    "declared_duration_seconds": duration,
 }
-JSON
-)
+if title is not None:
+    body["title"] = title
+
+print(json.dumps(body))
+' "${PY_ARGS[@]}")
 
 if [ "${AUDIVO_UPLOAD_DRY_RUN:-}" = "1" ]; then
   echo "$BODY"
   exit 0
 fi
 
-RESPONSE=$(curl -sS --fail-with-body -X POST "$BASE/v1/uploads" \
+# Capture the status and body separately (no --fail-with-body) so a refusal
+# still shows its JSON error, which names when capacity returns.
+RESPONSE=$(curl -sS -w '\n%{http_code}' -X POST "$BASE/v1/uploads" \
   -H "Authorization: Bearer $AUDIVO_API_KEY" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   --data "$BODY")
 
-UPLOAD_ID=$(printf '%s' "$RESPONSE" | python3 -c '
+HTTP_STATUS=$(printf '%s' "$RESPONSE" | tail -n 1)
+RESPONSE_BODY=$(printf '%s' "$RESPONSE" | sed '$d')
+
+case "$HTTP_STATUS" in
+  2??) ;;
+  *)
+    printf '%s\n' "$RESPONSE_BODY" >&2
+    echo "upload.sh: announcement refused with HTTP $HTTP_STATUS" >&2
+    exit 1
+    ;;
+esac
+
+UPLOAD_ID=$(printf '%s' "$RESPONSE_BODY" | python3 -c '
 import json, sys
 print(json.load(sys.stdin)["upload_id"])
 ')
-PUT_URL=$(printf '%s' "$RESPONSE" | python3 -c '
+PUT_URL=$(printf '%s' "$RESPONSE_BODY" | python3 -c '
 import json, sys
 print(json.load(sys.stdin)["put_url"])
 ')
@@ -114,7 +143,7 @@ print(json.load(sys.stdin)["put_url"])
 PUT_HEADER_ARGS=()
 while IFS= read -r header_line; do
   PUT_HEADER_ARGS+=(-H "$header_line")
-done < <(printf '%s' "$RESPONSE" | python3 -c '
+done < <(printf '%s' "$RESPONSE_BODY" | python3 -c '
 import json, sys
 data = json.load(sys.stdin)
 for key, value in data["put_headers"].items():

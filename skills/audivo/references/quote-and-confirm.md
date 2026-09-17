@@ -128,8 +128,11 @@ Exclusion reasons: `feed_unavailable`, `feed_unparseable`, `budget_exceeded`,
 `music_led`, `no_feed_url`, `duplicate_show`, `chart_size_capped`,
 `total_selection_capped`, `no_episodes`, `no_guid`, `no_enclosure`,
 `episode_not_in_feed`, `episode_not_found`, `no_declared_duration`,
-`no_stable_asset_revision`. A `budget_exceeded` entry means the request ran
-out of time reading that feed; quote again with fewer shows.
+`no_stable_asset_revision`, `upload_not_found`, `upload_not_received`,
+`upload_mismatch`. A `budget_exceeded` entry means the request ran out of
+time reading that feed; quote again with fewer shows. The three
+`upload_*` reasons are specific to an uploads quote; see
+`references/uploads.md`.
 
 If everything was excluded the answer is `422 nothing_to_quote` and the
 message counts the reasons.

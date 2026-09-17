@@ -5,7 +5,7 @@ obtained yourself and hold the rights to transcribe (for example with
 `yt-dlp`, from a Spotify- or YouTube-only show). Audivo's servers never
 fetch from YouTube or Spotify; you bring the bytes. For everything reachable
 by feed or Apple link, use `references/discover.md` and
-`references/quote-and-confirm.md` instead — an upload costs the same as a
+`references/quote-and-confirm.md` instead. An upload costs the same as a
 fresh job and skips no rule.
 
 An upload is three calls: announce it, PUT the bytes, then quote it like any
@@ -96,7 +96,7 @@ Name the `upload_id` in a quote, the same operation as everything else
 ```
 
 1 to 100 uploads per quote. This is `QuoteFromUploads`, one of the three
-quote shapes (`shows`, `chart`, `uploads`) — send exactly one, and an
+quote shapes (`shows`, `chart`, `uploads`): send exactly one, and an
 uploads quote has no `episodes_per_show`. Each upload is verified with one
 object head (present, the declared length, the declared hash) and priced
 from `declared_duration_seconds`. The resulting `QuoteEntry` looks like any
@@ -112,10 +112,11 @@ other, with these differences:
 | `upload_id`                   | Present. This is how you tell an upload entry apart from a feed one.                |
 | `declared_duration_seconds`   | Echoes what you announced.                                                          |
 
-Everything past this point — `total_ceiling_credits`, `confirm`, polling the
-group, reading the transcript — is identical to a feed-sourced job. An
-upload's transcript is cached for your account alone; it is never shared
-with or priced cheaper for another account the way a public episode's is.
+Everything past this point is identical to a feed-sourced job:
+`total_ceiling_credits`, `confirm`, polling the group, reading the
+transcript. An upload's transcript is cached for your account alone; it is
+never shared with or priced cheaper for another account the way a public
+episode's is.
 
 ## The declared-duration ceiling
 
