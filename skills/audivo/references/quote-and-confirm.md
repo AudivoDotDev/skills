@@ -1,5 +1,8 @@
 # Quote and confirm
 
+For **many episodes at once**. One episode needs no quote: send it to
+`POST /v1/transcripts` (`references/poll-and-read.md`, `scripts/transcribe.sh`).
+
 A quote prices a selection and reserves nothing. A confirm spends what the
 quote priced, as one job group. Every guard on the confirm runs before the
 first credit moves, so a refusal writes nothing.

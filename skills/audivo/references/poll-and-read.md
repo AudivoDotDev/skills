@@ -1,9 +1,11 @@
 # Poll and read
 
-After a confirm you hold a `group_id`, and inside it `job_id`s to poll and
-`read_id`s that are already paid. This file covers reading the group, the
-job states, the transcript formats, what caching does to the price, and the
-one-call path for a single episode.
+For one episode, `POST /v1/transcripts` is the whole path: it answers with the
+transcript, or with a job to poll (see "The one-call path" below;
+`scripts/transcribe.sh` does it end to end). After a confirm you hold a
+`group_id` instead, and inside it `job_id`s to poll and `read_id`s that are
+already paid. This file covers both, the job states, the transcript formats,
+and what caching does to the price.
 
 ## Read the group
 
@@ -154,24 +156,28 @@ rounded up, never under one. A read you already paid for is free through
 
 `POST /v1/transcripts` (operationId `createTranscript`)
 
-Skips the quote when you already hold a pointer. Body is exactly one of
-three shapes, plus optional fields:
+The default for one episode: no quote first. Body is exactly one of four
+shapes, plus optional fields:
 
 ```json
 { "url": "https://podcasts.apple.com/us/podcast/x/id123?i=456" }
 { "feed_url": "https://example.com/feed.xml", "guid": "episode-guid" }
 { "episode_id": "ep_..." }
+{ "upload_id": "upl_..." }
 ```
 
 | optional field | meaning                                                                                   |
 | -------------- | ----------------------------------------------------------------------------------------- |
-| `dry_run`      | `true` prices only: `is_cached`, `estimated_credits`, `quote_ceiling_credits`, `quote_basis`, `estimated_seconds`. Reserves nothing. |
+| `max_credits`  | The most this call may take. A job's ceiling (estimate plus 25%) or a cached read's price above it is refused `422 max_credits_exceeded` before anything is held. Never lowers the reservation. |
+| `dry_run`      | `true` prices only: `is_cached`, `estimated_credits`, `quote_ceiling_credits`, `quote_basis`, `estimated_seconds`. Reserves nothing. With `max_credits`, refuses exactly when the call would. |
 | `language`     | A BCP-47 tag when you know it. Omitted, the engine detects it.                           |
 | `format`       | Only `json` is served on this path. Read other formats through the job or read operations. |
 
 Send an `Idempotency-Key` header. It is optional here but a retry without
-one can start a second job for the same episode. A repeat while the original
-is still running is `409 request_in_progress`; retry with the same key.
+one can start a second job for the same episode; derive it from the body, as
+`scripts/transcribe.sh` does, and a repeat of the same request is always the
+same job. A repeat while the original is still running is
+`409 request_in_progress`; retry with the same key.
 
 Three answers:
 
@@ -183,7 +189,10 @@ Three answers:
 
 Refusals that reserve nothing: `422 source_not_supported`, `feed_dead`,
 `episode_not_found`, `duration_exceeded` (over 10 hours), `size_exceeded`
-(over 5 GB), `451 content_blocked`, `402 payment_required`.
+(over 5 GB), `max_credits_exceeded`, `451 content_blocked`,
+`402 payment_required`; for an `upload_id`, `404 upload_not_found`,
+`409 upload_not_received` (retry once the PUT has landed) and
+`422 upload_mismatch`.
 
 `GET /v1/episodes/{episode_id}/transcript` (operationId
 `getEpisodeTranscript`) fetches a cached transcript for a known episode and

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Announce a local audio file, PUT it to the presigned URL, and print a
-# ready quote body. Spends no credits; a quote and confirm still follow.
+# Announce a local audio file and PUT it to the presigned URL. Prints the
+# upload_id; transcribe it with `transcribe.sh <upload_id>`, or name it in a
+# quote with others (the quote body is printed too). Spends no credits.
 # Usage: upload.sh <file> [title]
 #   AUDIVO_DURATION_SECONDS: required if ffprobe is not on PATH. Seconds,
 #     for example 1807.4.
@@ -158,6 +159,7 @@ curl -sS --fail-with-body -X PUT -T "$FILE" \
   "$PUT_URL"
 
 echo "upload_id: $UPLOAD_ID" >&2
+echo "transcribe it: transcribe.sh $UPLOAD_ID   (or quote it with others:)" >&2
 cat <<JSON
 {"uploads":[{"upload_id":"$UPLOAD_ID"}]}
 JSON

@@ -8,9 +8,11 @@ by feed or Apple link, use `references/discover.md` and
 `references/quote-and-confirm.md` instead. An upload costs the same as a
 fresh job and skips no rule.
 
-An upload is three calls: announce it, PUT the bytes, then quote it like any
-other entry. `scripts/upload.sh` does the first two and prints what the
-third needs.
+An upload is three calls: announce it, PUT the bytes, then transcribe it
+with `POST /v1/transcripts` and `{ "upload_id": ... }`, the same one call
+every episode uses. `scripts/upload.sh` does the first two and prints the
+`upload_id`; `scripts/transcribe.sh <upload_id>` does the third. To price
+several uploads together, name them in a quote instead (section 3).
 
 ## 1. Announce the file
 
@@ -86,9 +88,23 @@ mismatched hash is refused at the PUT with `BadDigest`, not later at quote
 time. There is no retry built into `scripts/upload.sh`: a failed PUT means
 announce again and PUT the fresh URL.
 
-## 3. Quote it
+## 3. Transcribe it
 
-Name the `upload_id` in a quote, the same operation as everything else
+```bash
+scripts/transcribe.sh upl_7c1f0a9b3e2d4c5b6a7f8e9d
+```
+
+or `POST /v1/transcripts` with `{ "upload_id": "upl_..." }`. The call checks
+the object once (present, the announced length, the announced hash), prices
+it from `declared_duration_seconds` with the usual 25% ceiling, and answers
+`202` with a job, or `200` with the transcript if this account already
+transcribed the same file. A failed check is an error on this path:
+`404 upload_not_found`, `409 upload_not_received` (send the PUT, then the
+same request again), or `422 upload_mismatch`.
+
+### Or quote several together
+
+Name the `upload_id`s in a quote, the same operation as everything else
 (`references/quote-and-confirm.md`):
 
 ```json

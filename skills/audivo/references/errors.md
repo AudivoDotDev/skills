@@ -37,6 +37,7 @@ Status and type are the spec's. "Do" is what an agent should do next.
 | `payment_required`    | 402    | payment_required  | no    | Balance cannot cover the ceiling. Shrink the selection or ask the user to add credits, then quote again. |
 | `rate_limited`        | 429    | rate_limited      | yes   | Over requests per minute. Sleep for `Retry-After` seconds, then repeat the same request. |
 | `concurrency_limited` | 429    | rate_limited      | yes   | The plan's open-job cap is reached. Wait for a job to finish, or confirm fewer episodes. |
+| `max_credits_exceeded` | 422   | unprocessable_input | no  | The call could take more than the `max_credits` you sent. The message names the figure. Raise the cap (ask the user first if they set it) or pick a shorter episode. Nothing was spent. |
 | `upload_quota_exceeded` | 429  | rate_limited      | yes   | The account already holds its 10 GiB / 100-announcement upload allowance. No `PUT` URL was issued. The message names the earliest time enough capacity returns; there is no way to release an announcement early. See `references/uploads.md`. |
 
 ### Quotes, confirms and groups
@@ -90,6 +91,17 @@ the quote's `excluded[]` with one of these reasons instead. Full detail in
 | `upload_not_found`      | The `upload_id` is unknown, belongs to another account, or is past `retained_until`. Announce again. |
 | `upload_not_received`   | Nothing has landed at the bucket key yet. Send the PUT, then quote again.                        |
 | `upload_mismatch`       | What landed does not match the announced length or hash. Announce again with the correct file.   |
+
+### Transcribing an upload
+
+On `POST /v1/transcripts` with `upload_id` these are errors; on a quote they
+are the `excluded[].reason` of that upload (section above).
+
+| code                  | status | type                | retry | what to do                                                                 |
+| --------------------- | ------ | ------------------- | ----- | -------------------------------------------------------------------------- |
+| `upload_not_found`    | 404    | not_found           | no    | Unknown, another account's, or past `retained_until`. Announce again.       |
+| `upload_not_received` | 409    | conflict            | yes   | Nothing has landed yet. Finish the PUT, then send the same request again.   |
+| `upload_mismatch`     | 422    | unprocessable_input | no    | What landed is not what was announced. Announce the file as it is and PUT it again. |
 
 ### Your account
 
