@@ -1,0 +1,29 @@
+{
+  "name": "audivo-local",
+  "displayName": "Audivo (local, with YouTube)",
+  "version": "0.3.0",
+  "description": "Podcast transcripts in one call through the local Audivo MCP server, including YouTube episodes downloaded on your machine with yt-dlp and audio files on your disk. Asks for your Audivo API key once.",
+  "author": { "name": "Audivo", "url": "https://audivo.dev" },
+  "homepage": "https://github.com/AudivoDotDev/mcp",
+  "repository": "https://github.com/AudivoDotDev/skills",
+  "license": "MIT",
+  "keywords": ["podcasts", "transcripts", "youtube", "audivo", "mcp"],
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "Audivo API key",
+      "description": "An API key (hk_live_...) from https://dash.audivo.dev. Stored in your system's secure credential store.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "audivo": {
+      "command": "npx",
+      "args": ["-y", "@audivo/mcp@^0.3.0"],
+      "env": {
+        "AUDIVO_API_KEY": "${user_config.api_key}"
+      }
+    }
+  }
+}

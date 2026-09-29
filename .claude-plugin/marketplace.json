@@ -1,0 +1,33 @@
+{
+  "name": "audivo",
+  "description": "Audivo's plugins: podcast transcripts in one call, from an episode link to the text.",
+  "owner": {
+    "name": "Audivo",
+    "url": "https://audivo.dev"
+  },
+  "plugins": [
+    {
+      "name": "audivo",
+      "source": "./plugins/audivo",
+      "description": "Podcast transcripts through Audivo's hosted MCP server: sign in once, then ask for any episode. Works in Claude Code, claude.ai and Cowork.",
+      "category": "productivity",
+      "tags": [
+        "podcasts",
+        "transcripts",
+        "mcp"
+      ]
+    },
+    {
+      "name": "audivo-local",
+      "source": "./plugins/audivo-local",
+      "description": "Podcast transcripts through the local Audivo MCP server with your API key, including YouTube episodes downloaded on your machine with yt-dlp. Claude Code.",
+      "category": "productivity",
+      "tags": [
+        "podcasts",
+        "transcripts",
+        "youtube",
+        "mcp"
+      ]
+    }
+  ]
+}

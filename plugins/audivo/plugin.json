@@ -1,0 +1,32 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "audivo",
+  "version": "0.3.0",
+  "description": "Podcast transcripts in one call: ask for an episode by name or link and get its transcript, to summarise, quote or search.",
+  "author": { "name": "Audivo", "url": "https://audivo.dev" },
+  "homepage": "https://docs.audivo.dev/mcp-server",
+  "repository": "https://github.com/AudivoDotDev/skills",
+  "license": "MIT",
+  "keywords": ["podcasts", "transcripts", "audivo", "mcp"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Audivo",
+        "shortDescription": "Podcast transcripts in one call",
+        "longDescription": "Ask for a podcast episode by name, Apple Podcasts link or RSS feed, and Audivo transcribes it and hands the transcript back, a page at a time, to summarise, quote or search. Episodes already transcribed come back at once. Signing in connects your Audivo account; transcription spends your Audivo credits, about one per audio minute.",
+        "developerName": "Audivo",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": "https://audivo.dev",
+        "privacyPolicyURL": "https://audivo.dev/privacy",
+        "termsOfServiceURL": "https://audivo.dev/terms",
+        "defaultPrompt": [
+          "Transcribe the latest episode of Acquired and summarise it in five bullet points.",
+          "Find the episode of Lex Fridman with Andrej Karpathy and pull out every quote about education.",
+          "What did the last three episodes of Hard Fork say about AI regulation?"
+        ],
+        "brandColor": "#1F6F5F"
+      }
+    }
+  }
+}

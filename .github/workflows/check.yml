@@ -1,0 +1,30 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every plugin carries the skill exactly as skills/audivo has it
+        run: scripts/sync-plugins.sh --check
+      - name: Every script parses and is executable
+        run: |
+          set -euo pipefail
+          for script in scripts/*.sh skills/audivo/scripts/*.sh; do
+            bash -n "$script"
+            test -x "$script" || { echo "$script is not executable"; exit 1; }
+          done
+      - name: Every manifest is JSON
+        run: |
+          set -euo pipefail
+          for manifest in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json plugins/*/plugin.json plugins/*/.mcp.json plugins/*/mcp.json; do
+            python3 -m json.tool "$manifest" >/dev/null
+          done

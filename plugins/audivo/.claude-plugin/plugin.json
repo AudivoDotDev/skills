@@ -1,0 +1,11 @@
+{
+  "name": "audivo",
+  "displayName": "Audivo",
+  "version": "0.3.0",
+  "description": "Podcast transcripts in one call: ask for an episode by name or link and get its transcript, to summarise, quote or search. Uses Audivo's hosted MCP server; you sign in to your Audivo account once.",
+  "author": { "name": "Audivo", "url": "https://audivo.dev" },
+  "homepage": "https://docs.audivo.dev/mcp-server",
+  "repository": "https://github.com/AudivoDotDev/skills",
+  "license": "MIT",
+  "keywords": ["podcasts", "transcripts", "audivo", "mcp"]
+}
