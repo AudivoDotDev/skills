@@ -19,9 +19,25 @@ claude plugin install audivo-local@audivo    # local server: your API key, plus 
 
 Pick one. `audivo` connects to `https://api.audivo.dev/mcp` and signs you in
 through Audivo's OAuth page; it also works on claude.ai and in Cowork.
-`audivo-local` runs `npx -y @audivo/mcp` on your machine, asks for your API key
-once and keeps it in your system's credential store, and adds YouTube and local
-files. See each plugin's README under `plugins/`.
+`audivo-local` runs `npx -y @audivo/mcp@latest` on your machine, asks for your
+API key once and keeps it in your system's credential store, and adds YouTube and
+local files. See each plugin's README under `plugins/`.
+
+### Updates
+
+Both servers stay current without a plugin update: the hosted one is updated by
+Audivo, and the local one is fetched as `@audivo/mcp@latest` each time it
+starts. In a running session, `/mcp`, then **Reconnect**, picks up a new release.
+
+The plugins' skill and settings update through the marketplace. Claude Code
+leaves auto-update off for marketplaces other than Anthropic's own; turn it on
+in `/plugin` under **Marketplaces**, `audivo`, **Enable auto-update**, or update
+by hand:
+
+```bash
+claude plugin marketplace update audivo
+claude plugin update audivo@audivo          # or audivo-local@audivo
+```
 
 ## Install the skill on its own
 
@@ -83,7 +99,7 @@ skills/audivo/
 
 ## Other ways to use Audivo
 
-- **MCP server.** Run `npx -y @audivo/mcp` locally, or point an MCP client at
+- **MCP server.** Run `npx -y @audivo/mcp@latest` locally, or point an MCP client at
   the hosted server at `https://api.audivo.dev/mcp`: clients that support MCP
   authorization sign in with your Audivo account; others send your key in the
   `Authorization` header. See [docs.audivo.dev/mcp-server](https://docs.audivo.dev/mcp-server).
