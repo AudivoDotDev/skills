@@ -4,6 +4,23 @@ Everything OpenAI's review asks for that does not live in `plugin.json`.
 This file is not in the ZIP (`scripts/build-chatgpt.mjs` packs only the
 manifest, `mcp.json`, `assets/` and `skills/`).
 
+## Review information: what the dashboard needs before you submit
+
+"Incomplete review information" means one of these is still empty. In
+**Metadata & Skills → Review information → Review details**:
+
+- [ ] **Reviewer credentials** (below). Not in the ZIP, by design.
+- [ ] **Demo video URL** (below), unless `review.demo_recording_url` is in
+      `plugin.json`.
+- [x] Five positive and three negative test cases, and release notes:
+      imported from the ZIP.
+
+In **MCPs**, after the scan:
+
+- [ ] A **justification for each tool's annotations** (the table below).
+- [ ] Domain verification, then a current scan (Rescan after any server
+      deployment).
+
 ## Annotation justifications
 
 The dashboard imports each tool's annotations from the server's scan and
@@ -47,10 +64,11 @@ Enter in **Review details**:
   and everything else is free. Keep this account; it is used for later
   reviews too.
 
-## Screenshots
+## Screenshots (optional)
 
-One per starter prompt, in the same order, PNG or JPEG, **706 pixels wide
-and 400–860 tall**:
+The directory no longer shows screenshots, so you can skip them. If you add
+any, give one per starter prompt, in the same order, PNG or JPEG, **706
+pixels wide and 400–860 tall**:
 
 1. `screenshot-1.png`: "Transcribe the latest episode of Hard Fork and
    summarize it…", showing the transcript reader beside the summary.

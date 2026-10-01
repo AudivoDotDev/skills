@@ -173,6 +173,22 @@ for (const [i, prompt] of prompts.entries()) {
   oneLine(prompt, 128, `defaultPrompt[${i}]`);
   if (/@\w/.test(prompt)) fail(`defaultPrompt[${i}] must not @mention a server`);
 }
+// The listing describes what the plugin does; the plugin guidelines forbid
+// advertising pricing, subscriptions, free trials, discounts or promotions in
+// it, and OpenAI's review flags credits and pricing language as such.
+const COMMERCIAL =
+  /\b(price[sd]?|pricing|costs?|credits?|free|trials?|discounts?|promo(tion)?s?|subscri\w*|plans?|upgrade\w*|pay|paid|purchase\w*)\b|[$€£]/i;
+for (const [field, value] of [
+  ['description', manifest.description],
+  ['displayName', ui.displayName],
+  ['shortDescription', ui.shortDescription],
+  ['longDescription', ui.longDescription],
+  ...(ui.capabilities ?? []).map((value, i) => [`capabilities[${i}]`, value]),
+  ...prompts.map((value, i) => [`defaultPrompt[${i}]`, value]),
+]) {
+  const found = typeof value === 'string' ? COMMERCIAL.exec(value) : null;
+  if (found !== null) fail(`${field} mentions "${found[0]}": keep pricing and offers out of the listing`);
+}
 const normalized = prompts.map((p) => p.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase());
 if (new Set(normalized).size !== normalized.length) fail('defaultPrompt entries must be unique');
 if (!/^#[0-9A-Fa-f]{6}$/.test(ui.brandColor ?? '') || contrast(ui.brandColor, '#FFFFFF') < 2) {
@@ -183,14 +199,11 @@ if (ui.brandColorDark !== undefined && contrast(ui.brandColorDark, '#212121') < 
 }
 icon(ui.logo, 'logo');
 icon(ui.composerIcon, 'composerIcon');
-// The server serves its own UI (the Audivo app), so final submission wants
-// one screenshot per starter prompt, in the same order, 706 pixels wide and
-// 400 to 860 tall, PNG or JPEG.
+// Screenshots are optional (the directory no longer shows them), but when a
+// plugin with its own UI includes them, final submission wants one per
+// starter prompt, in order, 706 pixels wide and 400 to 860 tall.
 if (ui.screenshots === undefined) {
-  todo.push(
-    `screenshots: ${prompts.length} images, one per starter prompt in order, 706 px wide and 400-860 px tall ` +
-      '(see chatgpt/REVIEW.md)',
-  );
+  // Nothing to check.
 } else if (!Array.isArray(ui.screenshots) || ui.screenshots.length !== prompts.length) {
   fail(`screenshots: exactly one per starter prompt (${prompts.length})`);
 } else {
