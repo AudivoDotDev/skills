@@ -54,6 +54,13 @@ const CATEGORIES = new Set([
 
 const problems = [];
 const fail = (message) => problems.push(message);
+/**
+ * What final submission needs but an upload does not, and that can only
+ * exist once the plugin has been tried in ChatGPT: screenshots and the demo
+ * video. Listed, not failed, so the draft can be uploaded early (domain
+ * verification and the tool scan run on the draft) and CI stays green.
+ */
+const todo = [];
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(path.join(PACKAGE, file), 'utf8'));
@@ -93,6 +100,22 @@ function pngSize(file) {
   const bytes = fs.readFileSync(file);
   if (bytes.toString('ascii', 1, 4) !== 'PNG') return undefined;
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20), size: bytes.length };
+}
+
+/** A JPEG's size, from its first start-of-frame marker. */
+function jpegSize(file) {
+  const bytes = fs.readFileSync(file);
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8) return undefined;
+  for (let at = 2; at + 9 < bytes.length; ) {
+    if (bytes[at] !== 0xff) return undefined;
+    const marker = bytes[at + 1];
+    const length = bytes.readUInt16BE(at + 2);
+    if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+      return { width: bytes.readUInt16BE(at + 7), height: bytes.readUInt16BE(at + 5), size: bytes.length };
+    }
+    at += 2 + length;
+  }
+  return undefined;
 }
 
 function icon(relative, field) {
@@ -160,7 +183,35 @@ if (ui.brandColorDark !== undefined && contrast(ui.brandColorDark, '#212121') < 
 }
 icon(ui.logo, 'logo');
 icon(ui.composerIcon, 'composerIcon');
-if (ui.screenshots !== undefined) fail('screenshots: leave them out until there is one 706-pixel-wide image per prompt');
+// The server serves its own UI (the Audivo app), so final submission wants
+// one screenshot per starter prompt, in the same order, 706 pixels wide and
+// 400 to 860 tall, PNG or JPEG.
+if (ui.screenshots === undefined) {
+  todo.push(
+    `screenshots: ${prompts.length} images, one per starter prompt in order, 706 px wide and 400-860 px tall ` +
+      '(see chatgpt/REVIEW.md)',
+  );
+} else if (!Array.isArray(ui.screenshots) || ui.screenshots.length !== prompts.length) {
+  fail(`screenshots: exactly one per starter prompt (${prompts.length})`);
+} else {
+  for (const [i, relative] of ui.screenshots.entries()) {
+    const field = `screenshots[${i}]`;
+    if (typeof relative !== 'string' || !relative.startsWith('./')) {
+      fail(`${field} must be a ./-relative path`);
+      continue;
+    }
+    const file = path.join(PACKAGE, relative);
+    if (!fs.existsSync(file)) {
+      fail(`${field} names ${relative}, which is not in the package`);
+      continue;
+    }
+    const image = pngSize(file) ?? jpegSize(file);
+    if (image === undefined) fail(`${field} must be a PNG or a JPEG`);
+    else if (image.width !== 706 || image.height < 400 || image.height > 860) {
+      fail(`${field} is ${image.width}x${image.height}; it must be 706 wide and 400 to 860 tall`);
+    }
+  }
+}
 
 // --- Skills ------------------------------------------------------------------------
 
@@ -205,6 +256,12 @@ for (const [i, c] of (cases.negative ?? []).entries()) {
 if (typeof openai.publication?.release_notes !== 'string' || openai.publication.release_notes === '') {
   fail('publication.release_notes is required');
 }
+const demo = openai.review?.demo_recording_url;
+if (demo === undefined) {
+  todo.push('review.demo_recording_url: the walkthrough video (or enter it in the dashboard)');
+} else {
+  httpsUrl(demo, 'review.demo_recording_url');
+}
 
 if (problems.length > 0) {
   process.stderr.write(`chatgpt/ is not ready to submit:\n- ${problems.join('\n- ')}\n`);
@@ -214,6 +271,11 @@ process.stderr.write(
   `chatgpt/ passes: ${manifest.name} ${manifest.version}, ${skills.length} skills, ` +
     `${cases.positive.length} positive and ${cases.negative.length} negative review cases\n`,
 );
+if (todo.length > 0) {
+  process.stderr.write(
+    `Uploadable as a draft. Before submitting for review, still add:\n- ${todo.join('\n- ')}\n`,
+  );
+}
 if (CHECK_ONLY) process.exit(0);
 
 // --- The ZIP --------------------------------------------------------------------------
