@@ -1,0 +1,98 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "audivo",
+  "version": "1.0.0",
+  "description": "Podcast transcripts: ask for an episode and get its transcript, to summarize, quote or search.",
+  "author": { "name": "Audivo", "url": "https://audivo.dev" },
+  "homepage": "https://audivo.dev",
+  "repository": "https://github.com/AudivoDotDev/skills",
+  "license": "MIT",
+  "keywords": ["podcasts", "transcripts", "audio", "research"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Audivo",
+        "shortDescription": "Podcast episode transcripts",
+        "longDescription": "Audivo gets you the transcript of a podcast episode, so you can summarize it, pull quotes or search what was said without listening to the whole thing.\n\nAsk for an episode by name, by show, or with an Apple Podcasts link. Audivo finds it, transcribes it and shows the transcript in its reader: the show and episode, how long it runs, timestamps on every line, and a search box. An episode that has already been transcribed comes back at once; a new one takes a minute or two, and the reader fills in when it is done. Your transcripts stay in a library you can open from the sidebar or beside any conversation. For several episodes at once, Audivo can price them first and transcribe only after you agree.\n\nAudivo is for anyone who works with what is said on podcasts: researchers, writers, analysts, students and listeners who want the text.\n\nLimitations: Audivo transcribes episodes published in public podcast feeds. Shows that exist only on Spotify, YouTube or another closed platform cannot be transcribed. Transcribing an episode spends credits from your Audivo account; finding shows, browsing episodes and reading transcripts you already have do not. You sign in with an Audivo account, and Audivo only ever sees the requests made through its tools, never your conversation.",
+        "developerName": "Audivo",
+        "category": "Productivity",
+        "capabilities": [
+          "Transcribe podcast episodes",
+          "Read and search transcripts",
+          "Find podcasts and episodes",
+          "Price episodes before transcribing",
+          "Browse your transcript library"
+        ],
+        "websiteURL": "https://audivo.dev",
+        "supportURL": "https://audivo.dev/support",
+        "privacyPolicyURL": "https://audivo.dev/privacy",
+        "termsOfServiceURL": "https://audivo.dev/terms",
+        "defaultPrompt": [
+          "Transcribe the latest episode of Hard Fork and summarize it in five bullet points.",
+          "Find the Acquired episode about Costco and quote what they said about membership fees.",
+          "Show my Audivo transcripts."
+        ],
+        "brandColor": "#01BE65",
+        "brandColorDark": "#01D873",
+        "composerIcon": "./assets/composer-icon.png",
+        "logo": "./assets/logo.png"
+      },
+      "onboardingSkill": "./skills/get-started/SKILL.md",
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Find a show and list its newest episodes, spending nothing.",
+              "prompt": "Find the podcast Hard Fork and list its five newest episodes.",
+              "tools_triggered": "search_shows, list_episodes",
+              "expected_behavior": "Finds Hard Fork and lists its five newest episodes with their dates and lengths. Nothing is transcribed and no credits are spent."
+            },
+            {
+              "description": "Transcribe one episode and summarize it from the transcript.",
+              "prompt": "Transcribe the newest episode of Hard Fork and summarize it in five bullet points.",
+              "tools_triggered": "search_shows, list_episodes, transcribe, read_transcript",
+              "expected_behavior": "ChatGPT asks before calling transcribe, which spends credits. The transcript reader appears with the show, episode, length and cost; if the job is still running it shows progress and fills in when done (read_transcript waits for it). The five bullet points are drawn from the transcript."
+            },
+            {
+              "description": "Open the transcript library.",
+              "prompt": "Show my Audivo transcripts.",
+              "tools_triggered": "list_transcripts",
+              "expected_behavior": "The library lists the account's recent transcripts, including the one from the previous case, with show and episode titles, status and date. Opening one shows it in the reader. Nothing is spent."
+            },
+            {
+              "description": "Quote from a transcript already made, with timestamps.",
+              "prompt": "In that Hard Fork transcript, quote every passage that mentions AI, with timestamps.",
+              "tools_triggered": "read_transcript",
+              "expected_behavior": "Quotes the passages word for word with their timestamps, reading further pages of the existing transcript as needed. Nothing is transcribed again and no credits are spent."
+            },
+            {
+              "description": "Price several episodes without spending.",
+              "prompt": "How much would it cost to transcribe the latest episode of Hard Fork, Acquired and The Daily? Don't transcribe anything yet.",
+              "tools_triggered": "search_shows, quote",
+              "expected_behavior": "Returns a price for each episode and the total, and stops there: confirm and transcribe are not called and no credits are spent."
+            }
+          ],
+          "negative": [
+            {
+              "description": "A Spotify-only link. Audivo transcribes public podcast feeds and cannot fetch from Spotify: the expected answer says so, suggests searching for the show by name, and spends nothing.",
+              "prompt": "Transcribe this episode: https://open.spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk"
+            },
+            {
+              "description": "A purchase or plan change. Audivo has no tool for buying credits or changing plans and does not promote plans: the expected answer says the account is managed at audivo.dev and calls no tool.",
+              "prompt": "Buy me more Audivo credits and upgrade my plan."
+            },
+            {
+              "description": "Audio that is not a published podcast episode. The plugin cannot reach files on the user's device or private recordings: the expected answer explains that Audivo transcribes public podcast episodes, and spends nothing.",
+              "prompt": "Transcribe the voicemail my sister left me yesterday."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "Audivo sells nothing in ChatGPT. Transcribing spends credits from the user's existing Audivo account; credits are bought at audivo.dev."
+      },
+      "publication": {
+        "release_notes": "First release: transcribe podcast episodes in one request, read and search transcripts in the Audivo reader, open your transcript library from the sidebar or beside a conversation, and price several episodes before spending."
+      }
+    }
+  }
+}

@@ -25,6 +25,11 @@ jobs:
       - name: Every manifest is JSON
         run: |
           set -euo pipefail
-          for manifest in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json plugins/*/plugin.json plugins/*/.mcp.json plugins/*/mcp.json; do
+          for manifest in .claude-plugin/marketplace.json plugins/*/.claude-plugin/plugin.json plugins/*/.mcp.json chatgpt/plugin.json chatgpt/mcp.json; do
             python3 -m json.tool "$manifest" >/dev/null
           done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: The ChatGPT package meets OpenAI's submission rules
+        run: node scripts/build-chatgpt.mjs --check

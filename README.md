@@ -116,6 +116,22 @@ skills/audivo/
 
 MIT, see [LICENSE](LICENSE).
 
+## ChatGPT
+
+`chatgpt/` is the package submitted to OpenAI's plugin directory, which ChatGPT and Codex share: a
+manifest with the listing and its review cases, the hosted MCP server (`https://api.audivo.dev/mcp`,
+signed in with an Audivo account), a skill written for that server and its app, and an onboarding
+skill. It does not carry the shared skill in `skills/audivo`: that one is for agents that can run
+its scripts and reach local files, which ChatGPT cannot.
+
+```bash
+node scripts/build-chatgpt.mjs          # checks OpenAI's rules, then writes dist/audivo-chatgpt-<version>.zip
+node scripts/build-chatgpt.mjs --check  # checks only, as CI does
+```
+
+Upload the ZIP at platform.openai.com/plugins. A change to the manifest, the skills or the review
+cases needs a new version and a new ZIP; a change to the server's tools or its app does not.
+
 ## Maintaining
 
 The skill lives once, at `skills/audivo`. Each plugin carries a copy, because a
