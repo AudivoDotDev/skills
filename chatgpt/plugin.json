@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "audivo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Podcast transcripts: ask for an episode and get its transcript, to summarize, quote or search.",
   "author": {
     "name": "Audivo",
@@ -95,6 +95,7 @@
             }
           ]
         },
+        "demo_recording_url": "https://youtu.be/D-N2MHnh31g",
         "commerce": false,
         "commerce_description": "Audivo sells nothing in ChatGPT. Transcribing spends credits from the user's existing Audivo account; credits are bought at audivo.dev."
       },

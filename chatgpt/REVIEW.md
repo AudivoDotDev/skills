@@ -10,8 +10,9 @@ manifest, `mcp.json`, `assets/` and `skills/`).
 **Metadata & Skills → Review information → Review details**:
 
 - [ ] **Reviewer credentials** (below). Not in the ZIP, by design.
-- [ ] **Demo video URL** (below), unless `review.demo_recording_url` is in
-      `plugin.json`.
+- [x] **Demo video URL**: `review.demo_recording_url` in `plugin.json`. The
+      dashboard reads it only from the ZIP, so a new video means a new
+      version and a new upload.
 - [x] Five positive and three negative test cases, and release notes:
       imported from the ZIP.
 
